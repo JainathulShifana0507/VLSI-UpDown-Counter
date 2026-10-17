@@ -1,0 +1,17 @@
+# Simulation executables
+sim
+counter_sim
+up_down_sim
+*.exe
+
+# Generated waveform files
+*.vcd
+
+# Temporary files
+*.log
+*.tmp
+
+# Editor and operating system files
+.vscode/
+.DS_Store
+Thumbs.db

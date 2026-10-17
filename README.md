@@ -1,61 +1,175 @@
 # Verilog HDL: 4-Bit Synchronous Up/Down Counter
 
-## Project Overview
-This project implements and verifies two 4-bit synchronous counters using Verilog HDL:
-1. Synchronous Up Counter
-2. Synchronous Up/Down Counter
+A digital design and functional verification project implementing a 4-bit synchronous up counter and a 4-bit synchronous up/down counter using Verilog HDL.
 
-Both designs use a rising-edge-triggered clock and a synchronous, active-high reset.
+## 1. Project Overview
 
-## Features
-- 4-bit counter with 16 states (0–15)
-- Synchronous reset
-- Up-counting and down-counting control
-- Upward rollover from 15 to 0
-- Downward rollover from 0 to 15
-- Self-checking Verilog testbenches
-- Simulation waveform visualization using GTKWave
+This project demonstrates the design, simulation, and verification of two sequential digital circuits:
 
-## Technology Stack
-- Verilog HDL
-- Icarus Verilog — RTL simulation
-- GTKWave — waveform analysis
-- Visual Studio Code — code editing
+- **Synchronous Up Counter**
+- **Synchronous Up/Down Counter**
 
-## Project Structure
-- `rtl/` — counter RTL modules
-- `testbench/` — testbenches for both designs
-- `docs/` — waveform screenshot
-- `README.md` — project documentation
-- `.gitignore` — excludes generated simulation files
+Both counters operate on the rising edge of the clock and use an active-high synchronous reset.
 
-## Counter Operation
+The project focuses on RTL design, sequential logic, self-checking testbenches, rollover behaviour, and waveform-based debugging.
 
-### Synchronous Up Counter
-- `reset = 1`: count becomes 0 at the next rising clock edge.
-- `reset = 0`: count increments by 1 at each rising edge.
-- The counter wraps from 15 to 0.
+## 2. Design Specifications
 
-### Synchronous Up/Down Counter
-- `reset = 1`: count becomes 0 at the next rising clock edge.
-- `reset = 0`, `up_down = 1`: count increments by 1.
-- `reset = 0`, `up_down = 0`: count decrements by 1.
-- The counter wraps between 0 and 15.
+| Parameter | Description |
+|---|---|
+| Counter width | 4 bits |
+| Number of states | 16 |
+| Count range | 0–15 |
+| Clock triggering | Positive edge |
+| Reset type | Synchronous |
+| Reset polarity | Active-high |
+| HDL | Verilog |
 
-## Verification
-Both testbenches were simulated using Icarus Verilog.
+## 3. Features
 
-- Up-counter testbench: all implemented checks passed.
-- Up/down-counter testbench: all implemented checks passed.
-- Tests cover reset behavior, counting sequences, and rollover conditions.
-- The up/down counter testbench also verifies that synchronous reset does not change the count immediately when asserted between rising clock edges.
+- 4-bit binary counting
+- Synchronous reset to `0000`
+- Separate up-counter and up/down-counter modules
+- Direction control using the `up_down` signal
+- Automatic rollover at the counting limits
+- Self-checking testbenches
+- Simulation waveform generation and analysis
 
-## Waveform
-See [`docs/up_down_counter_waveform.png`](docs/up_down_counter_waveform.png) for the up/down counter simulation waveform captured in GTKWave.
+## 4. Block Diagram
 
-## Learning Outcomes
-- Sequential digital logic design
-- Verilog RTL coding
-- Synchronous reset implementation
-- Testbench development and functional verification
-- Simulation waveform analysis and debugging
+```text
+                 +-----------------------+
+ Clock --------->|                       |
+ Reset --------->|  4-Bit Synchronous     |----> 4-bit Count
+ up_down ------->|  Up/Down Counter       |
+                 |                       |
+                 +-----------------------+
+```
+
+The `up_down` input controls the counting direction in the up/down counter. The separate synchronous up counter does not require this control input.
+
+## 5. Counter Operation
+
+### 5.1 Synchronous Up Counter
+
+| Reset | Operation at rising clock edge |
+|---|---|
+| `1` | Count resets to `0000` |
+| `0` | Count increments by 1 |
+
+Example sequence:
+
+`0000 → 0001 → 0010 → ... → 1111 → 0000`
+
+### 5.2 Synchronous Up/Down Counter
+
+| Reset | `up_down` | Operation |
+|---|---|---|
+| `1` | X | Reset to `0000` |
+| `0` | `1` | Increment by 1 |
+| `0` | `0` | Decrement by 1 |
+
+Example up-counting sequence:
+
+`0000 → 0001 → 0010 → ... → 1111 → 0000`
+
+Example down-counting sequence:
+
+`0000 → 1111 → 1110 → ... → 0001 → 0000`
+
+Because the counter is 4-bit wide, arithmetic naturally wraps around modulo 16.
+
+## 6. Repository Structure
+
+```text
+VLSI_UpDown_Counter/
+├── rtl/
+│   ├── sync_up_counter.v
+│   └── sync_up_down_counter.v
+├── testbench/
+│   ├── tb_sync_up_counter.v
+│   └── tb_sync_up_down_counter.v
+├── docs/
+│   └── up_down_counter_waveform.png
+├── .gitignore
+└── README.md
+```
+
+- `rtl/` — synthesizable counter designs
+- `testbench/` — simulation stimulus and output checks
+- `docs/` — captured simulation waveform
+- `.gitignore` — excludes generated simulation files and waveforms
+
+## 7. Verification and Test Cases
+
+Both designs were simulated using Icarus Verilog with self-checking testbenches.
+
+The implemented checks cover:
+
+- Reset behaviour at a rising clock edge
+- Normal up-counting operation
+- Up/down counting direction
+- Up-counter rollover from 15 to 0
+- Down-counter rollover from 0 to 15
+- Reset behaviour when asserted between rising clock edges
+
+The testbenches report individual pass/fail results and a final test summary.
+
+**Verification status:** All implemented checks passed in the recorded simulation runs.
+
+## 8. Running the Simulation
+
+Install [Icarus Verilog](https://steveicarus.github.io/iverilog/) and ensure that `iverilog` and `vvp` are available in your terminal.
+
+### Up Counter
+
+```bash
+iverilog -o counter_sim rtl/sync_up_counter.v testbench/tb_sync_up_counter.v
+vvp counter_sim
+```
+
+### Up/Down Counter
+
+```bash
+iverilog -o up_down_sim rtl/sync_up_down_counter.v testbench/tb_sync_up_down_counter.v
+vvp up_down_sim
+```
+
+To inspect generated waveforms, open the relevant `.vcd` file in GTKWave. The testbenches generate `counter.vcd` and `up_down_counter.vcd`, respectively.
+
+## 9. Simulation Waveform
+
+The waveform below is included in the repository:
+
+[View Up/Down Counter Waveform](docs/up_down_counter_waveform.png)
+
+The waveform can be used to inspect clock transitions, reset behaviour, the direction-control signal, and the counter output over time.
+
+## 10. Tools and Technologies
+
+- **Verilog HDL** — RTL design
+- **Icarus Verilog** — compilation and simulation
+- **GTKWave** — waveform inspection
+- **Visual Studio Code** — development environment
+- **Git and GitHub** — version control and project hosting
+
+## 11. Learning Outcomes
+
+- Designing sequential circuits using Verilog HDL
+- Understanding clocked logic and synchronous reset
+- Implementing binary up/down counters
+- Writing self-checking testbenches
+- Verifying rollover and boundary conditions
+- Analysing simulation waveforms
+- Managing RTL projects with Git and GitHub
+
+## 12. Future Improvements
+
+- Add parameterised counter width
+- Add additional boundary-condition and reset test cases
+- Explore FPGA synthesis and resource utilisation
+- Implement an FPGA-based demonstration using switches, clock input, and LEDs
+
+---
+
+**Project focus:** RTL Design | Digital Electronics | Functional Verification | Verilog HDL
